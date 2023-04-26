@@ -15,14 +15,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Mock users
-const users = [
-  {
-    id: 1,
-    email: 'teste@email.com',
-    password: '$2b$10$YUMa.BM8..Q./dElyd0SIe3XYZMcMHXSHf00fAPegShMpODRMPclS',
-  },
-];
+const { readData, writeData } = require('./filestorage');
+const users = readData();
 
 passport.use(
   new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
@@ -51,28 +45,8 @@ passport.deserializeUser((id, done) => {
   done(null, user);
 });
 
-app.get('/', (req, res) => {
-  res.render('index', { message: req.flash('error') });
-});
-
-app.post(
-  '/login',
-  passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/',
-    failureFlash: true,
-  })
-);
-
-app.get('/dashboard', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.render('dashboard');
-  } else {
-    res.redirect('/');
-  }
-});
-
-
+const routes = require('./routes/index');
+app.use('/', routes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
