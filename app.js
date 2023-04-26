@@ -47,6 +47,13 @@ passport.deserializeUser((id, done) => {
 
 const routes = require('./routes/index');
 app.use('/', routes);
+
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Algo deu errado!');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
