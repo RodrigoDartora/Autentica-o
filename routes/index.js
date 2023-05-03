@@ -6,7 +6,18 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const { readData, writeData } = require('../filestorage');
 
-const users = readData();
+let users = [];
+
+// Carregar os dados dos usuários do MongoDB
+async function loadUsers() {
+  try {
+    users = await readData();
+  } catch (err) {
+    console.error("Erro ao ler dados do MongoDB:", err);
+  }
+}
+
+loadUsers();
 
 router.get('/', (req, res) => {
   res.render('index', { message: req.flash('error'), success: req.flash('success')[0] });
@@ -53,9 +64,11 @@ router.post('/signup', async (req, res) => {
       password: hashedPassword,
     };
     users.push(user);
-    writeData(users);
+    // Aguarde a conclusão da função writeData antes de redirecionar
+    await writeData(users);
     res.redirect('/');
   } catch (err) {
+    console.error(err); // Adicione esta linha para ver o erro no console, se houver algum
     req.flash('error', 'Ocorreu um erro ao tentar criar a conta');
     res.redirect('/signup');
   }
